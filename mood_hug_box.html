@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>心情抱抱箱｜家庭自用</title>
+<style>
+:root{--cream:#fff0d9;--paper:#fff8ed;--orange:#f05a00;--orange2:#f49a2f;--brown:#774018;--line:#c78a4b;--ink:#54341c}
+*{box-sizing:border-box}
+body{margin:0;background:#f7e9dc;color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;font-size:18px}
+header{padding:20px 16px 8px;text-align:center}
+header h1{margin:0;color:#a94a0b;font-size:clamp(26px,4vw,38px)}
+header p{margin:8px 0 0;font-size:16px}
+.wrap{max-width:1040px;margin:auto;padding:12px 16px 32px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.panel{background:var(--cream);border-radius:32px;padding:24px;box-shadow:0 10px 25px #8c593322;border:1px solid #f4d8b4}
+.pill{background:linear-gradient(90deg,#f4a23b,#e98722);color:white;border-radius:40px;padding:12px 16px;text-align:center;font-size:clamp(22px,3vw,30px);font-weight:900;text-shadow:0 2px 2px #87400b55}
+.sub{text-align:center;margin:16px 0 20px}
+.mic-area{display:flex;justify-content:center;margin:20px 0}
+.mic{width:min(70vw,270px);height:min(70vw,270px);max-width:270px;max-height:270px;border:0;border-radius:50%;background:linear-gradient(145deg,#f44d00,#e94b00);color:white;box-shadow:0 8px 0 #c53e00,0 12px 25px #c53e0030;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;touch-action:manipulation}
+.mic:active,.mic.recording{transform:translateY(4px);box-shadow:0 3px 0 #c53e00,0 8px 18px #c53e0030;background:#c94000}
+.mic svg{width:76px;height:76px;fill:white}
+.mic strong{font-size:clamp(27px,4vw,38px)}
+.hint{text-align:center;line-height:1.7;margin:18px 0}
+.controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+button{font:inherit;cursor:pointer}
+.secondary,.primary,.soft{border:2px solid var(--line);border-radius:18px;padding:12px 18px;background:#fff4e3;color:#8b3f0b;font-weight:800}
+.primary{background:var(--orange);border-color:var(--orange);color:white;font-size:22px;width:100%;padding:16px}
+.soft{background:#fffaf1}
+.status{min-height:28px;text-align:center;color:#a7460a;font-weight:700;margin:10px 0}
+.card{border:2px solid #d7a16c;border-radius:24px;padding:20px;margin:18px 0;background:#fff6e8}
+.card h2{text-align:center;margin:0 0 16px;color:#8b430e;font-size:24px}
+.mood{display:flex;align-items:center;justify-content:center;gap:18px}
+.face{font-size:62px;line-height:1}
+.mood-label{font-size:28px;font-weight:900;color:#c04c0b}
+.score{font-size:40px;font-weight:900;color:#c04c0b}
+.small{text-align:center;font-size:15px;line-height:1.7}
+.replylist{display:flex;flex-wrap:wrap;gap:8px}
+.replylist button{border:1px solid #d7a16c;border-radius:22px;background:#fff1dc;padding:10px 13px;color:#7a3a0c}
+.log{max-height:260px;overflow:auto}
+.entry{background:#fff8ec;border-radius:15px;padding:12px;margin:10px 0;border-left:4px solid #ef8b2c}
+.entry time{font-size:13px;color:#926747}
+.entry p{white-space:pre-wrap;margin:6px 0}
+textarea{width:100%;min-height:95px;border:2px solid #d7a16c;border-radius:16px;background:#fffaf2;padding:12px;font:inherit;color:var(--ink);resize:vertical}
+footer{text-align:center;padding:0 16px 28px;font-size:15px}
+@media(max-width:760px){.wrap{grid-template-columns:1fr;padding:10px 12px 24px}.panel{padding:20px;border-radius:26px}.mic{width:230px;height:230px}}
+</style>
+</head>
+<body>
+<header>
+<h1>🍊 心情抱抱箱</h1>
+<p>有話慢慢說，讓心情有人聽見。家庭自用、免費使用。</p>
+</header>
+<main class="wrap">
+<section class="panel">
+<div class="pill">⌂　心情抱抱箱</div>
+<p class="sub">今天有什麼不開心？慢慢說，沒關係。</p>
+<div class="mic-area">
+<button id="talkBtn" class="mic" aria-label="開始說話">
+<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="24" y="4" width="16" height="34" rx="8"/><path d="M15 28a3 3 0 0 1 6 0 11 11 0 0 0 22 0 3 3 0 0 1 6 0 17 17 0 0 1-14 16.7V52h8a3 3 0 0 1 0 6H21a3 3 0 0 1 0-6h8v-7.3A17 17 0 0 1 15 28z"/></svg>
+<strong id="talkLabel">按一下說話</strong>
+</button>
+</div>
+<p class="hint">按一下開始說話，再按一下結束。<br>如果瀏覽器不支援語音辨識，也可以在下方打字。</p>
+<div id="status" class="status" role="status">我在這裡，準備好聽你說了。</div>
+<textarea id="manualText" placeholder="也可以在這裡打字，例如：今天覺得很累……" aria-label="輸入想說的話"></textarea>
+<div class="controls" style="margin-top:12px">
+<button id="saveBtn" class="primary">送出心情</button>
+</div>
+<div class="controls" style="margin-top:12px">
+<button id="historyBtn" class="secondary">歷史紀錄</button>
+<button id="settingsBtn" class="secondary">設定</button>
+</div>
+</section>
+<section class="panel">
+<div class="pill">♥　家人心情看板</div>
+<div class="card">
+<h2>今天的心情</h2>
+<div class="mood"><span id="face" class="face">😊</span><div><div id="moodLabel" class="mood-label">願意分享</div><div><span id="score" class="score">—</span><span style="font-size:20px"> / 10</span></div></div></div>
+<p id="moodSummary" class="small">說說今天的心情，這裡會留下紀錄。</p>
+</div>
+<button id="comfortBtn" class="primary">🔊 陪我說幾句安慰的話</button>
+<div class="card">
+<h2>💛 可以這樣回應你</h2>
+<div class="replylist">
+<button data-reply="我在聽，你慢慢說。">我在聽，你慢慢說</button>
+<button data-reply="今天辛苦你了，先休息一下。">今天辛苦了</button>
+<button data-reply="你的感受很重要，我有聽見。">我有聽見</button>
+<button data-reply="先喝口溫水，我陪你慢慢來。">先休息一下</button>
+</div>
+<p class="small">按下句子，網站會用語音念出來。</p>
+</div>
+<div class="card">
+<h2>📝 今日紀錄</h2>
+<div id="logs" class="log"><p class="small">目前還沒有紀錄。</p></div>
+<div class="controls"><button id="clearBtn" class="soft">清除本機紀錄</button></div>
+</div>
+</section>
+</main>
+<footer>家庭自用・免費・資料預設只保存在目前這台裝置的瀏覽器中。<br>語音辨識與朗讀效果會依瀏覽器、裝置和網路環境而異。</footer>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = 'grandma_complaint_box_v1';
+let entries = [];
+try { entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { entries = []; }
+let recognition = null, recording = false, spokenText = '';
+const supported = ('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window);
+if (supported) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'zh-TW';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onresult = event => {
+    let finalText = '', interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalText += t; else interim += t;
+    }
+    if (finalText) spokenText += finalText;
+    $('manualText').value = (spokenText + (interim ? interim : '')).trim();
+  };
+  recognition.onerror = event => {
+    $('status').textContent = event.error === 'not-allowed' ? '麥克風權限未開啟，請允許使用麥克風，或改用打字。' : '語音辨識暫時無法使用，可以改用打字。';
+    stopRecording();
+  };
+  recognition.onend = () => { if (recording) { try { recognition.start(); } catch(e) {} } };
+}
+function stopRecording() {
+  recording = false; $('talkBtn').classList.remove('recording'); $('talkLabel').textContent = '按一下說話';
+  if (recognition) { try { recognition.stop(); } catch(e) {} }
+}
+$('talkBtn').addEventListener('click', () => {
+  if (!recognition) { $('status').textContent = '目前瀏覽器不支援語音辨識，請在下方打字。'; return; }
+  if (!recording) {
+    spokenText = $('manualText').value.trim();
+    recording = true; $('talkBtn').classList.add('recording'); $('talkLabel').textContent = '說完再按一下';
+    $('status').textContent = '正在聽你說話……說完請再按一下。';
+    try { recognition.start(); } catch(e) { $('status').textContent = '無法啟動麥克風，請確認權限。'; stopRecording(); }
+  } else {
+    stopRecording(); $('status').textContent = '已停止聆聽。想好後可以按「送出心情」。';
+  }
+});
+function say(text) {
+  if (!('speechSynthesis' in window)) { $('status').textContent = '這個瀏覽器不支援語音朗讀，但文字仍可使用。'; return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW'; u.rate = 0.84; u.pitch = 1.0; u.volume = 1;
+  const voices = speechSynthesis.getVoices();
+  const voice = voices.find(v => /zh-TW|Chinese.*Taiwan/i.test(v.lang + ' ' + v.name)) || voices.find(v => /zh/i.test(v.lang));
+  if (voice) u.voice = voice;
+  speechSynthesis.speak(u);
+}
+function persist() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch(e) {} }
+function render() {
+  $('logs').innerHTML = '';
+  if (!entries.length) { $('logs').innerHTML = '<p class="small">目前還沒有紀錄。</p>'; $('score').textContent = '—'; $('moodLabel').textContent = '願意分享'; $('face').textContent = '😊'; $('moodSummary').textContent = '說說今天的心情，這裡會留下紀錄。'; return; }
+  entries.slice().reverse().forEach(item => {
+    const div = document.createElement('div'); div.className = 'entry';
+    const time = document.createElement('time'); time.textContent = item.time;
+    const p = document.createElement('p'); p.textContent = item.text;
+    div.append(time,p); $('logs').append(div);
+  });
+  const today = new Date().toLocaleDateString();
+  const todays = entries.filter(e => new Date(e.ts).toLocaleDateString() === today);
+  $('score').textContent = '8'; $('moodLabel').textContent = '有人聽我說';
+  $('face').textContent = '😊';
+  $('moodSummary').textContent = `今天留下 ${todays.length} 則心情紀錄。這個指數是鼓勵分享的示意值，不是自動判斷情緒。`;
+}
+$('saveBtn').addEventListener('click', () => {
+  stopRecording();
+  const text = $('manualText').value.trim();
+  if (!text) { $('status').textContent = '先說幾句或打幾個字吧，我在聽。'; say('我在這裡，你慢慢說，不用著急。'); return; }
+  const now = new Date();
+  entries.push({text, ts: now.toISOString(), time: now.toLocaleString()});
+  persist(); render(); $('manualText').value = ''; spokenText = '';
+  $('status').textContent = '已保存到這台裝置。謝謝你願意說出來。';
+  say('我聽見了。今天辛苦你了，先慢慢呼吸，休息一下。你想說的話很重要。');
+});
+$('comfortBtn').addEventListener('click', () => say('辛苦你了。我在這裡陪你。想說什麼都可以慢慢說，不用急。你的感受很重要。家人忙完也會來關心你。現在先放鬆肩膀，慢慢吸氣，再慢慢呼氣。'));
+document.querySelectorAll('[data-reply]').forEach(btn => btn.addEventListener('click', () => say(btn.dataset.reply)));
+$('historyBtn').addEventListener('click', () => { $('logs').scrollIntoView({behavior:'smooth',block:'center'}); $('status').textContent = '這裡是保存在本機瀏覽器的歷史紀錄。'; });
+$('settingsBtn').addEventListener('click', () => {
+  const current = localStorage.getItem('grandma_complaint_voice') || 'on';
+  const next = current === 'on' ? 'off' : 'on';
+  localStorage.setItem('grandma_complaint_voice', next);
+  $('status').textContent = next === 'on' ? '語音回應偏好：開啟。按安慰按鈕即可朗讀。' : '提示：瀏覽器仍可朗讀；若想安靜使用，請調低裝置音量或關閉聲音。';
+});
+$('clearBtn').addEventListener('click', () => {
+  if (confirm('確定要清除這台裝置上的所有心情紀錄嗎？此操作無法復原。')) { entries = []; persist(); render(); $('status').textContent = '本機紀錄已清除。'; }
+});
+render();
+})();
+</script>
+</body>
+</html>
